@@ -1,0 +1,6 @@
+github.com/IamNanjo/go-logging v0.0.0-20260307120312-a6795167dd7d h1:mTPGiXtvvQ3cT0PXS0RXcO6E5+zstoyo270HVc2ss+8=
+github.com/IamNanjo/go-logging v0.0.0-20260307120312-a6795167dd7d/go.mod h1:Z5y/nICky0RNPszBABWjFfBkY0FUcMOzI/pNDQlpVUI=
+github.com/IamNanjo/go-logging v0.0.0-20260307195504-a34d2421b032 h1:v81mSLM9kxvaXHymaKIg4LlehwkOPG77O5sJPs0W06Q=
+github.com/IamNanjo/go-logging v0.0.0-20260307195504-a34d2421b032/go.mod h1:9B2WiTveP9drxQq7XGKYqbrQquB4BdLXNlXSgEjGEis=
+golang.org/x/sys v0.41.0 h1:Ivj+2Cp/ylzLiEU89QhWblYnOE9zerudt9Ftecq2C6k=
+golang.org/x/sys v0.41.0/go.mod h1:OgkHotnGiDImocRcuBABYBEXf8A9a87e/uXjp9XT3ks=
