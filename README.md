@@ -1,5 +1,8 @@
 # Go flagenv
 
+[![Go](https://github.com/IamNanjo/go-flagenv/actions/workflows/go.yml/badge.svg)](https://github.com/IamNanjo/go-flagenv/actions/workflows/go.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/IamNanjo/go-flagenv)](https://goreportcard.com/report/github.com/IamNanjo/go-flagenv)
+
 Uses reflection and struct tags to parse flags and environment variables (also from .env file) with
 optional defaults and support for required variables that will cause the parser to panic if they are missing or empty
 
