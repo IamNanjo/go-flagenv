@@ -4,3 +4,5 @@ github.com/IamNanjo/go-logging v0.0.0-20260307195504-a34d2421b032 h1:v81mSLM9kxv
 github.com/IamNanjo/go-logging v0.0.0-20260307195504-a34d2421b032/go.mod h1:9B2WiTveP9drxQq7XGKYqbrQquB4BdLXNlXSgEjGEis=
 golang.org/x/sys v0.41.0 h1:Ivj+2Cp/ylzLiEU89QhWblYnOE9zerudt9Ftecq2C6k=
 golang.org/x/sys v0.41.0/go.mod h1:OgkHotnGiDImocRcuBABYBEXf8A9a87e/uXjp9XT3ks=
+golang.org/x/sys v0.42.0 h1:omrd2nAlyT5ESRdCLYdm3+fMfNFE/+Rf4bDIQImRJeo=
+golang.org/x/sys v0.42.0/go.mod h1:4GL1E5IUh+htKOUEOaiffhrAeqysfVGipDYzABqnCmw=

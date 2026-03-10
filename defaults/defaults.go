@@ -3,7 +3,7 @@ package defaults
 import (
 	"reflect"
 
-	"github.com/IamNanjo/go-flagenv/internal/fields"
+	"github.com/IamNanjo/go-flagenv/fields"
 )
 
 // Set defaults if not defined by user

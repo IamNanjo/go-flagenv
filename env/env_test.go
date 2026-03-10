@@ -3,8 +3,8 @@ package env_test
 import (
 	"testing"
 
-	"github.com/IamNanjo/go-flagenv/internal/env"
-	"github.com/IamNanjo/go-flagenv/internal/fields"
+	"github.com/IamNanjo/go-flagenv/env"
+	"github.com/IamNanjo/go-flagenv/fields"
 	"github.com/IamNanjo/go-flagenv/testdata"
 )
 

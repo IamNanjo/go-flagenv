@@ -3,8 +3,8 @@ package required_test
 import (
 	"testing"
 
-	"github.com/IamNanjo/go-flagenv/internal/fields"
-	"github.com/IamNanjo/go-flagenv/internal/required"
+	"github.com/IamNanjo/go-flagenv/fields"
+	"github.com/IamNanjo/go-flagenv/required"
 	"github.com/IamNanjo/go-flagenv/testdata"
 )
 
@@ -23,7 +23,7 @@ func TestRequired(t *testing.T) {
 	}
 
 	config.IntSlicePtr = new(testdata.IntSlice)
-	err = config.IntSlicePtr.FromString("1,2,3")
+	err = config.IntSlicePtr.UnmarshalText([]byte("1,2,3"))
 	if err != nil {
 		t.Fatalf("Failed to create IntSlice from string %v", err)
 	}

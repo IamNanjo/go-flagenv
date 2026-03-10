@@ -11,8 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/IamNanjo/go-flagenv/convert"
-	"github.com/IamNanjo/go-flagenv/internal/fields"
+	convert "github.com/IamNanjo/go-flagenv/convert"
+	"github.com/IamNanjo/go-flagenv/fields"
+	internalConvert "github.com/IamNanjo/go-flagenv/internal/convert"
 	"github.com/IamNanjo/go-flagenv/internal/format"
 )
 
@@ -72,7 +73,7 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		if isPointer && Default != nil {
 			defaultType := reflect.TypeOf(Default)
 			pointer := reflect.ValueOf(Default)
-			if defaultType.Implements(convert.CustomParserType) && pointer.IsNil() {
+			if defaultType.Implements(internalConvert.CustomParserType) && pointer.IsNil() {
 				Default = reflect.New(reflect.TypeOf(Default).Elem()).Interface()
 			} else if pointer.IsNil() {
 				Default = reflect.Zero(reflect.TypeOf(Default).Elem()).Interface()
@@ -85,7 +86,7 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		var defaultStringBuilder strings.Builder
 
 		defaultType := reflect.TypeOf(Default)
-		if defaultType.Implements(convert.CustomParserType) {
+		if defaultType.Implements(internalConvert.CustomParserType) {
 			parser, ok := Default.(convert.CustomParser)
 			if !ok {
 				return format.Err("Could not use field %q as CustomParser", field.StructField.Name)
@@ -102,13 +103,13 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 
 			flagValue = flagSet.String(flagName, parser.String(), finalDescription)
 			postProcess[flagName] = func() error {
-				err := parser.FromString(*flagValue.(*string))
+				err := parser.UnmarshalText([]byte(*flagValue.(*string)))
 				resultType := reflect.TypeOf(parser)
 				if resultType != field.StructField.Type {
-					return format.Err("CustomParser.FromString returned %q. Expected %q", resultType, field.StructField.Type)
+					return format.Err("CustomParser.UnmarshalText returned %q. Expected %q", resultType, field.StructField.Type)
 				}
 				if err != nil {
-					return format.Err("CustomParser.FromString failed %w", err)
+					return format.Err("CustomParser.UnmarshalText failed %w", err)
 				}
 				field.Value.Set(reflect.ValueOf(parser))
 				return nil
@@ -118,7 +119,7 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		}
 
 		switch field.StructField.Type {
-		case convert.IntSliceType:
+		case internalConvert.IntSliceType:
 			d := Default.([]int)
 			if len(d) == 0 {
 				defaultStringBuilder.WriteString("<empty>")
@@ -131,7 +132,7 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 				}
 			}
 			defaultStringBuilder.WriteString(" (%+v)")
-		case convert.StringSliceType:
+		case internalConvert.StringSliceType:
 			d := Default.([]string)
 			if len(d) == 0 {
 				defaultStringBuilder.WriteString("<empty>")
@@ -172,13 +173,13 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 			flagValue = flagSet.String(flagName, "", finalDescription)
 		case reflect.TypeFor[time.Duration]():
 			flagValue = flagSet.Duration(flagName, time.Duration(0), finalDescription)
-		case convert.StringSliceType:
-			flagValue := flagSet.String(flagName, convert.FromStringSlice(Default.([]string)), finalDescription)
+		case internalConvert.StringSliceType:
+			flagValue := flagSet.String(flagName, internalConvert.FromStringSlice(Default.([]string)), finalDescription)
 			postProcess[flagName] = func() error {
 				if *flagValue == "" {
 					return nil
 				}
-				result := convert.ToStringSlice(*flagValue)
+				result := internalConvert.ToStringSlice(*flagValue)
 				newValue := reflect.ValueOf(result)
 				if !shouldDereference {
 					field.Value.Set(newValue)

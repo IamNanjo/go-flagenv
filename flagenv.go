@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/IamNanjo/go-flagenv/defaults"
+	"github.com/IamNanjo/go-flagenv/dotenv"
+	"github.com/IamNanjo/go-flagenv/env"
+	"github.com/IamNanjo/go-flagenv/fields"
 	"github.com/IamNanjo/go-flagenv/flags"
-	"github.com/IamNanjo/go-flagenv/internal/defaults"
-	"github.com/IamNanjo/go-flagenv/internal/dotenv"
-	"github.com/IamNanjo/go-flagenv/internal/env"
-	"github.com/IamNanjo/go-flagenv/internal/fields"
 	"github.com/IamNanjo/go-flagenv/internal/format"
-	"github.com/IamNanjo/go-flagenv/internal/required"
+	"github.com/IamNanjo/go-flagenv/required"
 	"github.com/IamNanjo/go-logging"
 )
 
@@ -27,14 +27,14 @@ import (
 //
 // Supported variable types (env and []string will always be parsed from a string into the result type):
 //
-//	(*)bool
-//	(*)int
-//	(*)int64
-//	(*)uint
-//	(*)uint64
-//	(*)float64
-//	(*)string
-//	(*)[]string (assumes comma separated list and trims space around each value)
+//	(\*)bool
+//	(\*)int
+//	(\*)int64
+//	(\*)uint
+//	(\*)uint64
+//	(\*)float64
+//	(\*)string
+//	(\*)[]string (assumes comma separated list and trims space around each value)
 //	*convert.CustomParser (pointer to any other type that implements convert.CustomParser interface)
 func Parse[T any](config *T) error {
 	err := ParseCustom(config, os.Args[1:], ".env")

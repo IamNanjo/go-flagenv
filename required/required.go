@@ -3,7 +3,7 @@ package required
 import (
 	"fmt"
 
-	"github.com/IamNanjo/go-flagenv/internal/fields"
+	"github.com/IamNanjo/go-flagenv/fields"
 	"github.com/IamNanjo/go-flagenv/internal/format"
 )
 

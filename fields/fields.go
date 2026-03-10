@@ -3,7 +3,7 @@ package fields
 import (
 	"reflect"
 
-	"github.com/IamNanjo/go-flagenv/convert"
+	"github.com/IamNanjo/go-flagenv/internal/convert"
 	"github.com/IamNanjo/go-flagenv/internal/format"
 	"github.com/IamNanjo/go-logging"
 )
@@ -68,7 +68,7 @@ func Parse[T any](c *T) (*Fields, error) {
 
 		defaultValueString, hasDefault := structField.Tag.Lookup("default")
 		if hasDefault {
-			defaultValue, err := convert.AutoFromString(structField.Type, fieldValue, defaultValueString)
+			defaultValue, err := convert.AutoFromBytes(structField.Type, fieldValue, []byte(defaultValueString))
 			if err != nil {
 				return f, format.Err("Field %q default value parsing failed %w", structField.Name, err)
 			}

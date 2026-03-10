@@ -6,8 +6,8 @@ import (
 
 type CustomStruct struct{ Bool bool }
 
-func (cs *CustomStruct) FromString(input string) error {
-	cs.Bool = strings.ToLower(input) == "true"
+func (cs *CustomStruct) UnmarshalText(input []byte) error {
+	cs.Bool = strings.ToLower(string(input)) == "true"
 	return nil
 }
 

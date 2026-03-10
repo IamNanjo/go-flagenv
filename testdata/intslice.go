@@ -9,8 +9,8 @@ import (
 
 type IntSlice []int
 
-func (is *IntSlice) FromString(input string) error {
-	split := strings.Split(input, ",")
+func (is *IntSlice) UnmarshalText(input []byte) error {
+	split := strings.Split(string(input), ",")
 	result := make(IntSlice, 0, len(split))
 	for _, s := range split {
 		trimmed := strings.TrimSpace(s)
@@ -28,15 +28,15 @@ func (is *IntSlice) FromString(input string) error {
 	return nil
 }
 
-func (is *IntSlice) String() string {
-	if is == nil || len(*is) == 0 {
+func (is IntSlice) String() string {
+	if is == nil || len(is) == 0 {
 		return ""
 	}
 
 	var result strings.Builder
-	for i, num := range *is {
+	for i, num := range is {
 		result.WriteString(strconv.Itoa(num))
-		if i < len(*is)-1 {
+		if i < len(is)-1 {
 			result.WriteString(", ")
 		}
 	}
