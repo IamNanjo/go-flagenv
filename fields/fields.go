@@ -1,3 +1,4 @@
+// This package handles parsing supported fields in structs.
 package fields
 
 import (
@@ -46,7 +47,8 @@ func Parse[T any](c *T) (*Fields, error) {
 		}
 
 		if err := convert.FieldIsSupported(structField.Type); err != nil {
-			return f, format.Err("Field %q type is unsupported %w", structField.Name, err)
+			logging.Debug("Skipping unsupported field %q\n", structField.Name)
+			continue
 		}
 
 		field := &Field{StructField: structField, Value: fieldValue}
