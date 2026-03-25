@@ -13,13 +13,15 @@ func TestEnv(t *testing.T) {
 
 	t.Setenv("BOOL", "true")
 	t.Setenv("INT", "-10")
-	t.Setenv("INT64", "-20")
+	t.Setenv("INT64", "-50")
 	t.Setenv("UINT", "30")
-	t.Setenv("UINT64", "40")
-	t.Setenv("FLOAT64", "50.60")
+	t.Setenv("UINT64", "70")
+	t.Setenv("FLOAT64", "80.90")
 	t.Setenv("STRING", "string")
 	t.Setenv("STRING_SLICE", "value1,value2,value3")
+	t.Setenv("INT_SLICE", "-3, -2, -1, 0, 1, 2, 3")
 	t.Setenv("INT_SLICE_PTR", "-3, -2, -1, 0, 1, 2, 3")
+	t.Setenv("INT_PTR_SLICE_PTR", "-3, -2, -1, 0, 1, 2, 3")
 	t.Setenv("CUSTOM_STRUCT_PTR", "true")
 
 	config := new(testdata.AllTypes)

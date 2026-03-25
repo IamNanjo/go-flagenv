@@ -2,6 +2,7 @@ package flagenv
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 
@@ -25,20 +26,23 @@ import (
 //	required:"true"
 //	desc:"description"
 //
-// Supported variable types (env and []string will always be parsed from a string into the result type):
+// Environment variables and slices will always be parsed from a string.
+// Slices expect comma separated values and space around each value will have space around it trimmed.
 //
-//	(\*)bool
-//	(\*)int
-//	(\*)int64
-//	(\*)uint
-//	(\*)uint64
-//	(\*)float64
-//	(\*)string
-//	(\*)[]string (assumes comma separated list and trims space around each value)
+// Supported variable types (any of the normal types can be pointers, slices or pointers to slices of those values):
+//
+//	bool
+//	int(8/16/32/64)
+//	uint(8/16/32/64)
+//	float32
+//	float64
+//	string
+//	[]byte
+//	time.Duration
 //	*convert.CustomParser (pointer to any other type that implements convert.CustomParser interface)
 func Parse[T any](config *T) error {
 	err := ParseCustom(config, os.Args[1:], ".env")
-	if errors.Is(err, flags.HelpError) {
+	if errors.Is(err, flag.ErrHelp) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}

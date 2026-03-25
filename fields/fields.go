@@ -63,6 +63,10 @@ func Parse[T any](c *T) (*Fields, error) {
 			f.Env[envTag] = field
 		}
 
+		if !flagTagSet && !envTagSet {
+			continue
+		}
+
 		_, required := structField.Tag.Lookup("required")
 		if required {
 			f.Required = append(f.Required, field)
@@ -70,7 +74,7 @@ func Parse[T any](c *T) (*Fields, error) {
 
 		defaultValueString, hasDefault := structField.Tag.Lookup("default")
 		if hasDefault {
-			defaultValue, err := convert.AutoFromBytes(structField.Type, fieldValue, []byte(defaultValueString))
+			defaultValue, err := convert.AutoFromBytes(structField.Type, []byte(defaultValueString))
 			if err != nil {
 				return f, format.Err("Field %q default value parsing failed %w", structField.Name, err)
 			}

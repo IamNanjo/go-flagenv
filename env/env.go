@@ -21,7 +21,7 @@ func Parse[T any](c *T, f *fields.Fields) error {
 			continue
 		}
 
-		parsed, err := convert.AutoFromBytes(field.StructField.Type, field.Value, []byte(val))
+		parsed, err := convert.AutoFromBytes(field.StructField.Type, []byte(val))
 		if err != nil {
 			return format.Err("Failed to parse field %q with value %q %w", field.StructField.Name, val, err)
 		}

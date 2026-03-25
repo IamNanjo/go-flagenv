@@ -26,13 +26,31 @@ func TestDefault(t *testing.T) {
 	if v, cv := config.Int, 1000; v != cv {
 		t.Fatalf("Expected Int to be %+v. Got %+v", cv, v)
 	}
-	if v, cv := config.Int64, int64(1000); v != cv {
+	if v, cv := config.Int8, int8(64); v != cv {
+		t.Fatalf("Expected Int64 to be %+v. Got %+v", cv, v)
+	}
+	if v, cv := config.Int16, int16(128); v != cv {
+		t.Fatalf("Expected Int64 to be %+v. Got %+v", cv, v)
+	}
+	if v, cv := config.Int32, int32(256); v != cv {
+		t.Fatalf("Expected Int64 to be %+v. Got %+v", cv, v)
+	}
+	if v, cv := config.Int64, int64(512); v != cv {
 		t.Fatalf("Expected Int64 to be %+v. Got %+v", cv, v)
 	}
 	if v, cv := config.Uint, uint(1000); v != cv {
 		t.Fatalf("Expected Uint to be %+v. Got %+v", cv, v)
 	}
-	if v, cv := config.Uint64, uint64(1000); v != cv {
+	if v, cv := config.Uint8, uint8(64); v != cv {
+		t.Fatalf("Expected Int64 to be %+v. Got %+v", cv, v)
+	}
+	if v, cv := config.Uint16, uint16(128); v != cv {
+		t.Fatalf("Expected Int64 to be %+v. Got %+v", cv, v)
+	}
+	if v, cv := config.Uint32, uint32(256); v != cv {
+		t.Fatalf("Expected Int64 to be %+v. Got %+v", cv, v)
+	}
+	if v, cv := config.Uint64, uint64(512); v != cv {
 		t.Fatalf("Expected Uint64 to be %+v. Got %+v", cv, v)
 	}
 	if v, cv := config.Float64, float64(1000); v != cv {
@@ -43,26 +61,23 @@ func TestDefault(t *testing.T) {
 		t.Fatalf("Expected StringSlice to be non-nil. Got nil")
 	} else if v, cv := len(config.StringSlice), 2; v != cv {
 		t.Fatalf("Expected StringSlice to have %+v strings. Got %+v", cv, v)
-	} else if v, cv := config.StringSlice[0], "default1"; v != cv {
-		t.Fatalf("Expected StringSlice to have %+v strings. Got %+v", cv, v)
-	} else if v, cv := config.StringSlice[1], "default2"; v != cv {
-		t.Fatalf("Expected StringSlice to have %+v strings. Got %+v", cv, v)
+	} else if v, cv := config.StringSlice[0], "val1"; v != cv {
+		t.Fatalf("Expected StringSlice[0] to be %+v. Got %+v", cv, v)
+	} else if v, cv := config.StringSlice[1], "val2"; v != cv {
+		t.Fatalf("Expected StringSlice[1] to be %+v strings. Got %+v", cv, v)
 	}
 
 	if v, cv := config.Duration, time.Duration(time.Hour+time.Minute+time.Second); v != cv {
 		t.Fatalf("Expected Duration to be %+v. Got %+v", cv, v)
 	}
 
-	if v := config.IntSlicePtr; v == nil {
-		t.Fatalf("Expected StringSlice to be non-nil. Got nil")
-	} else if v, cv := len(*config.IntSlicePtr), 3; v != cv {
-		t.Fatalf("Expected StringSlice to have %+v strings. Got %+v", cv, v)
-	} else if v, cv := (*config.IntSlicePtr)[0], 1000; v != cv {
-		t.Fatalf("Expected StringSlice to have %+v strings. Got %+v", cv, v)
-	} else if v, cv := (*config.IntSlicePtr)[1], 1001; v != cv {
-		t.Fatalf("Expected StringSlice to have %+v strings. Got %+v", cv, v)
-	} else if v, cv := (*config.IntSlicePtr)[2], 1002; v != cv {
-		t.Fatalf("Expected StringSlice to have %+v strings. Got %+v", cv, v)
+	if v := config.IntSlice; v == nil {
+		t.Fatalf("Expected IntSlice to be non-nil. Got nil")
+	} else if v, cv := len(config.IntSlice), 2; v != cv {
+		t.Fatalf("Expected IntSlice to have %+v strings. Got %+v", cv, v)
+	} else if v, cv := (config.IntSlice)[0], 100; v != cv {
+		t.Fatalf("Expected IntSlice[0] to be %+v. Got %+v", cv, v)
+	} else if v, cv := (config.IntSlice)[1], 101; v != cv {
+		t.Fatalf("Expected IntSlice[1] to be %+v. Got %+v", cv, v)
 	}
-
 }

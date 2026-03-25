@@ -7,18 +7,15 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"strconv"
 	"strings"
-	"time"
 
-	convert "github.com/IamNanjo/go-flagenv/convert"
 	"github.com/IamNanjo/go-flagenv/fields"
 	internalConvert "github.com/IamNanjo/go-flagenv/internal/convert"
 	"github.com/IamNanjo/go-flagenv/internal/format"
 )
 
-const usageIndent = 6
-const usageSeparator = "  ·  "
+const usageIndent = 4
+const usageSeparator = " · "
 
 type helpError struct {
 	Message strings.Builder
@@ -32,7 +29,7 @@ func (e helpError) Unwrap() error {
 	return e.Inner
 }
 
-var HelpError = new(helpError)
+var HelpError = helpError{Inner: flag.ErrHelp}
 
 func Parse[T any](c *T, f *fields.Fields, args []string) error {
 	// Functions to be called after flags are parsed (value has been set in the pointer)
@@ -50,13 +47,13 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 
 		envTag, hasEnv := field.StructField.Tag.Lookup("env")
 		if hasEnv {
-			description = append(description, fmt.Sprintf("%s(ENV: %s)", usageSeparator, envTag))
+			description = append(description, fmt.Sprintf("%sENV: %s", usageSeparator, envTag))
 		} else {
 			description = append(description, "")
 		}
 
 		if field.Description != nil && *field.Description != "" {
-			description = append(description, fmt.Sprintf("  DESCRIPTION: %s", *field.Description))
+			description = append(description, fmt.Sprintf("DESCRIPTION: %s", *field.Description))
 		}
 
 		// If pointer, get type that is pointed to
@@ -65,8 +62,6 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		if isPointer {
 			actualType = actualType.Elem()
 		}
-		kind := actualType.Kind()
-		shouldDereference := !isPointer && kind != reflect.Slice && kind != reflect.Map
 
 		// Get default value that is being pointed at if field is a pointer
 		Default := field.Default
@@ -80,127 +75,64 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 			}
 		}
 
-		// Pointer to any supported value received from flag
+		// Pointer to value received from flag
 		var flagValue any = nil
 
-		var defaultStringBuilder strings.Builder
+		var defaultString strings.Builder
+		if reflect.TypeOf(Default).Implements(internalConvert.CustomParserType) {
+			description = append(description, "    DEFAULT: "+defaultString.String())
 
-		defaultType := reflect.TypeOf(Default)
-		if defaultType.Implements(internalConvert.CustomParserType) {
-			parser, ok := Default.(convert.CustomParser)
-			if !ok {
-				return format.Err("Could not use field %q as CustomParser", field.StructField.Name)
-			}
-			parsedString := parser.String()
-			if len(parsedString) == 0 {
-				defaultStringBuilder.WriteString("<empty>")
-			} else {
-				defaultStringBuilder.WriteString(parsedString)
-			}
-			description = append(description, "DEFAULT VALUE: "+defaultStringBuilder.String())
+			finalDescription := strings.Join(description, "\n  ")
 
-			finalDescription := strings.Join(description, "\n")
-
-			flagValue = flagSet.String(flagName, parser.String(), finalDescription)
+			flagValue = flagSet.String(flagName, "", finalDescription)
 			postProcess[flagName] = func() error {
-				err := parser.UnmarshalText([]byte(*flagValue.(*string)))
-				resultType := reflect.TypeOf(parser)
-				if resultType != field.StructField.Type {
-					return format.Err("CustomParser.UnmarshalText returned %q. Expected %q", resultType, field.StructField.Type)
-				}
+				parsed, err := internalConvert.AutoFromBytes(field.StructField.Type, []byte(*flagValue.(*string)))
 				if err != nil {
 					return format.Err("CustomParser.UnmarshalText failed %w", err)
 				}
-				field.Value.Set(reflect.ValueOf(parser))
+
+				field.Value.Set(reflect.ValueOf(parsed))
 				return nil
 			}
 
 			continue
 		}
 
-		switch field.StructField.Type {
-		case internalConvert.IntSliceType:
-			d := Default.([]int)
-			if len(d) == 0 {
-				defaultStringBuilder.WriteString("<empty>")
-			}
-			for i, s := range d {
-				defaultStringBuilder.WriteString(strconv.Itoa(s))
+		defaultString.WriteString(internalConvert.AutoToString(Default))
 
-				if i < len(d)-1 {
-					defaultStringBuilder.WriteString(", ")
-				}
-			}
-			defaultStringBuilder.WriteString(" (%+v)")
-		case internalConvert.StringSliceType:
-			d := Default.([]string)
-			if len(d) == 0 {
-				defaultStringBuilder.WriteString("<empty>")
-			}
-			for i, s := range d {
-				defaultStringBuilder.WriteString(s)
+		description = append(description, "    DEFAULT: "+defaultString.String())
 
-				if i < len(d)-1 {
-					defaultStringBuilder.WriteString(", ")
-				}
-			}
-			defaultStringBuilder.WriteString(" (%+v)")
-		case reflect.TypeFor[string]():
-			defaultStringBuilder.WriteString("%q")
-		default:
-			defaultStringBuilder.WriteString("%+v")
-		}
-
-		defaultString := fmt.Sprintf(defaultStringBuilder.String(), Default)
-		description = append(description, "DEFAULT VALUE: "+defaultString)
-
-		finalDescription := strings.Join(description, "\n")
+		finalDescription := strings.Join(description, "\n  ")
 
 		switch actualType {
 		case reflect.TypeFor[bool]():
 			flagValue = flagSet.Bool(flagName, false, finalDescription)
-		case reflect.TypeFor[int]():
-			flagValue = flagSet.Int(flagName, 0, finalDescription)
-		case reflect.TypeFor[int64]():
-			flagValue = flagSet.Int64(flagName, 0, finalDescription)
-		case reflect.TypeFor[uint]():
-			flagValue = flagSet.Uint(flagName, 0, finalDescription)
-		case reflect.TypeFor[uint64]():
-			flagValue = flagSet.Uint64(flagName, 0, finalDescription)
-		case reflect.TypeFor[float64]():
-			flagValue = flagSet.Float64(flagName, 0, finalDescription)
-		case reflect.TypeFor[string]():
-			flagValue = flagSet.String(flagName, "", finalDescription)
-		case reflect.TypeFor[time.Duration]():
-			flagValue = flagSet.Duration(flagName, time.Duration(0), finalDescription)
-		case internalConvert.StringSliceType:
-			flagValue := flagSet.String(flagName, internalConvert.FromStringSlice(Default.([]string)), finalDescription)
 			postProcess[flagName] = func() error {
-				if *flagValue == "" {
-					return nil
-				}
-				result := internalConvert.ToStringSlice(*flagValue)
-				newValue := reflect.ValueOf(result)
-				if !shouldDereference {
+				val := (flagValue.(*bool))
+				newValue := reflect.ValueOf(val)
+				if isPointer {
 					field.Value.Set(newValue)
 				} else {
 					field.Value.Set(newValue.Elem())
 				}
 				return nil
 			}
-			continue
 		default:
-			return format.Err("Unsupported type %q for flag %q", field.StructField.Type, flagName)
-		}
+			flagValue = flagSet.String(flagName, "", finalDescription)
+			postProcess[flagName] = func() error {
+				val := *(flagValue.(*string))
+				if val == "" {
+					return nil
+				}
+				result, err := internalConvert.AutoFromBytes(field.StructField.Type, []byte(val))
+				if err != nil {
+					return format.Err("Failed to convert from bytes %w", err)
+				}
 
-		postProcess[flagName] = func() error {
-			newValue := reflect.ValueOf(flagValue).Elem()
-			if !shouldDereference {
-				field.Value.Set(reflect.New(newValue.Type()))
-			} else {
-				field.Value.Set(newValue)
+				field.Value.Set(reflect.ValueOf(result))
+
+				return nil
 			}
-			return nil
 		}
 	}
 
@@ -209,12 +141,20 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		writer := flagSet.Output()
 
 		fmt.Fprintf(writer, "Usage of %s:", flagSet.Name())
-		flagSet.VisitAll(func(f *flag.Flag) {
-			fType := fmt.Sprintf("%T", f.Value)
-			fType = strings.TrimPrefix(fType, "*flag.")
-			fType = strings.TrimSuffix(fType, "Value")
+		flagSet.VisitAll(func(flag *flag.Flag) {
+			flagType := f.Flags[flag.Name].StructField.Type
+			if flagType.Kind() == reflect.Pointer {
+				flagType = flagType.Elem()
+			}
 
-			fmt.Fprintf(writer, "\n\n  -%s%s%s%s", f.Name, usageSeparator, fType, format.IndentAllLines(f.Usage, usageIndent)[usageIndent:])
+			fmt.Fprintf(
+				writer,
+				"\n\n  -%s%s%s%s",
+				flag.Name,
+				usageSeparator,
+				flagType,
+				format.IndentAllLines(flag.Usage, usageIndent)[usageIndent:],
+			)
 		})
 		fmt.Fprintln(writer)
 	}

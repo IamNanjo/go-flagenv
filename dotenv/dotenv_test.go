@@ -17,13 +17,15 @@ BOOL=true # Comments after values should be fine too
 
 INT=-10
 INT_PTR=-10
-INT64=-20
+INT64=-50
 UINT=30
-UINT64=40
-FLOAT64=50.60
+UINT64=70
+FLOAT64=80.90
 STRING="string"
 STRING_SLICE='value1,value2,value3'
+INT_SLICE=-3, -2, -1, 0, 1, 2, 3
 INT_SLICE_PTR=-3, -2, -1, 0, 1, 2, 3
+INT_PTR_SLICE_PTR=-3, -2, -1, 0, 1, 2, 3
 CUSTOM_STRUCT_PTR=true
 `)
 
