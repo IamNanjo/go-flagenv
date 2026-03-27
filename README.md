@@ -38,15 +38,21 @@ type AllTypes struct {
 func main() {
     config := new(AllTypes)
     if err := flagenv.Parse(config); err != nil {
-	// TODO: Parsing failed. Handle error here
+	// Parsing failed. Handle error here
     }
 }
 
+// Pass custom CLI flags and .env file path
 func main() {
     config := new(AllTypes)
-    if err := flagenv.ParseCustom(); err != nil {
-	// TODO: Parsing failed or help menu was requested.
-	// If err is flag.HelpError then help menu was called and program should typically exit after printing it.
+    if err := flagenv.ParseCustom(config, os.Args[1:], ".env"); err != nil {
+	// If err is flag.ErrHelp then help menu was called and program should typically exit after printing it.
+	if errors.Is(err, flag.ErrHelp) {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(2)
+	}
+
+	// Handle error
     }
 }
 ```

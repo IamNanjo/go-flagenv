@@ -65,7 +65,7 @@ func ParseCustom[T any](config *T, args []string, envPath string) error {
 
 	if len(args) != 0 {
 		if err = flags.Parse(config, f, args); err != nil {
-			if errors.Is(err, flags.HelpError) {
+			if errors.Is(err, flag.ErrHelp) {
 				return err
 			}
 			return format.Err("Flag parsing failed %w", err)
