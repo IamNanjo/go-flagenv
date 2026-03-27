@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/IamNanjo/go-flagenv/internal/format"
+	"github.com/IamNanjo/go-logging/pkg/format"
 )
 
 // Automatically convert to supported type

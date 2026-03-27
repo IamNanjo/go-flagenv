@@ -11,9 +11,10 @@ import (
 	"github.com/IamNanjo/go-flagenv/env"
 	"github.com/IamNanjo/go-flagenv/fields"
 	"github.com/IamNanjo/go-flagenv/flags"
-	"github.com/IamNanjo/go-flagenv/internal/format"
 	"github.com/IamNanjo/go-flagenv/required"
+
 	"github.com/IamNanjo/go-logging"
+	"github.com/IamNanjo/go-logging/pkg/format"
 )
 
 // Populate Config struct with CLI flags, .env file and environment variables in that priority order.

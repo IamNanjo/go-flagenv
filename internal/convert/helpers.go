@@ -4,7 +4,8 @@ import (
 	"reflect"
 
 	"github.com/IamNanjo/go-flagenv/convert"
-	"github.com/IamNanjo/go-flagenv/internal/format"
+
+	"github.com/IamNanjo/go-logging/pkg/format"
 )
 
 var CustomParserType = reflect.TypeFor[convert.CustomParser]()

@@ -10,8 +10,9 @@ import (
 	"strings"
 
 	"github.com/IamNanjo/go-flagenv/fields"
-	internalConvert "github.com/IamNanjo/go-flagenv/internal/convert"
-	"github.com/IamNanjo/go-flagenv/internal/format"
+	"github.com/IamNanjo/go-flagenv/internal/convert"
+
+	"github.com/IamNanjo/go-logging/pkg/format"
 )
 
 const usageIndent = 4
@@ -68,7 +69,7 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		if isPointer && Default != nil {
 			defaultType := reflect.TypeOf(Default)
 			pointer := reflect.ValueOf(Default)
-			if defaultType.Implements(internalConvert.CustomParserType) && pointer.IsNil() {
+			if defaultType.Implements(convert.CustomParserType) && pointer.IsNil() {
 				Default = reflect.New(reflect.TypeOf(Default).Elem()).Interface()
 			} else if pointer.IsNil() {
 				Default = reflect.Zero(reflect.TypeOf(Default).Elem()).Interface()
@@ -79,14 +80,14 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		var flagValue any = nil
 
 		var defaultString strings.Builder
-		if reflect.TypeOf(Default).Implements(internalConvert.CustomParserType) {
+		if reflect.TypeOf(Default).Implements(convert.CustomParserType) {
 			description = append(description, "    DEFAULT: "+defaultString.String())
 
 			finalDescription := strings.Join(description, "\n  ")
 
 			flagValue = flagSet.String(flagName, "", finalDescription)
 			postProcess[flagName] = func() error {
-				parsed, err := internalConvert.AutoFromBytes(field.StructField.Type, []byte(*flagValue.(*string)))
+				parsed, err := convert.AutoFromBytes(field.StructField.Type, []byte(*flagValue.(*string)))
 				if err != nil {
 					return format.Err("CustomParser.UnmarshalText failed %w", err)
 				}
@@ -98,7 +99,7 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 			continue
 		}
 
-		defaultString.WriteString(internalConvert.AutoToString(Default))
+		defaultString.WriteString(convert.AutoToString(Default))
 
 		description = append(description, "    DEFAULT: "+defaultString.String())
 
@@ -124,7 +125,7 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 				if val == "" {
 					return nil
 				}
-				result, err := internalConvert.AutoFromBytes(field.StructField.Type, []byte(val))
+				result, err := convert.AutoFromBytes(field.StructField.Type, []byte(val))
 				if err != nil {
 					return format.Err("Failed to convert from bytes %w", err)
 				}
@@ -153,7 +154,7 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 				flag.Name,
 				usageSeparator,
 				flagType,
-				format.IndentAllLines(flag.Usage, usageIndent)[usageIndent:],
+				indentAllLines(flag.Usage, usageIndent)[usageIndent:],
 			)
 		})
 		fmt.Fprintln(writer)
@@ -173,4 +174,16 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 	}
 
 	return nil
+}
+
+func indentAllLines(input string, indentWidth int) string {
+	indent := strings.Repeat(" ", indentWidth)
+
+	var result strings.Builder
+	for l := range strings.Lines(input) {
+		result.WriteString(indent)
+		result.WriteString(l)
+	}
+
+	return result.String()
 }

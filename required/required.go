@@ -4,7 +4,8 @@ import (
 	"fmt"
 
 	"github.com/IamNanjo/go-flagenv/fields"
-	"github.com/IamNanjo/go-flagenv/internal/format"
+
+	"github.com/IamNanjo/go-logging/pkg/format"
 )
 
 // Will panic if required fields are not provided
