@@ -45,10 +45,10 @@ var ToString = map[reflect.Type]func(input any) string{
 		return strconv.FormatUint(input.(uint64), 10)
 	},
 	reflect.TypeFor[float32](): func(input any) string {
-		return strconv.FormatFloat(float64(input.(float32)), 'g', 2, 32)
+		return strconv.FormatFloat(float64(input.(float32)), 'f', 2, 32)
 	},
 	reflect.TypeFor[float64](): func(input any) string {
-		return strconv.FormatFloat(input.(float64), 'g', 2, 64)
+		return strconv.FormatFloat(input.(float64), 'f', 2, 64)
 	},
 	reflect.TypeFor[[]byte](): func(input any) string {
 		return string(input.([]byte))
