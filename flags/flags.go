@@ -7,15 +7,18 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 
 	"github.com/IamNanjo/go-flagenv/fields"
 	"github.com/IamNanjo/go-flagenv/internal/convert"
 
+	"github.com/IamNanjo/go-logging/pkg/ansi"
 	"github.com/IamNanjo/go-logging/pkg/format"
 )
 
 const usageIndent = 4
+const usageSeparator = " · "
 
 type helpError struct {
 	Message strings.Builder
@@ -57,9 +60,12 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		}
 
 		if hasEnv {
-			description = append(description, fmt.Sprintf("ENV VARIABLE: %s", envTag))
-		} else {
-			description = append(description, "")
+			description = append(description,
+				fmt.Sprintf("ENV VARIABLE: %s", (&ansi.ColoredText{
+					Color: ansi.Green,
+					Text:  envTag,
+				}).String()),
+			)
 		}
 
 		if field.Description != nil && *field.Description != "" {
@@ -88,12 +94,13 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		// Pointer to value received from flag
 		var flagValue any = nil
 
-		var defaultString strings.Builder
+		defaultString := convert.AutoToString(Default)
+		if defaultString != "" && !slices.Contains(f.Required, field) {
+			description = append(description, "     DEFAULT: "+defaultString)
+		}
+		finalDescription := strings.Join(description, "\n")
+
 		if reflect.TypeOf(Default).Implements(convert.CustomParserType) {
-			description = append(description, "     DEFAULT: "+defaultString.String())
-
-			finalDescription := strings.Join(description, "\n")
-
 			flagValue = flagSet.String(flagName, "", finalDescription)
 			postProcess[flagName] = func() error {
 				parsed, err := convert.AutoFromBytes(field.StructField.Type, []byte(*flagValue.(*string)))
@@ -104,15 +111,8 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 				field.Value.Set(reflect.ValueOf(parsed))
 				return nil
 			}
-
 			continue
 		}
-
-		defaultString.WriteString(convert.AutoToString(Default))
-
-		description = append(description, "     DEFAULT: "+defaultString.String())
-
-		finalDescription := strings.Join(description, "\n")
 
 		switch actualType {
 		case reflect.TypeFor[bool]():
@@ -153,21 +153,24 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		fmt.Fprintf(writer, "Usage of %s:", flagSet.Name())
 
 		flagSet.VisitAll(func(flag *flag.Flag) {
-			flagType := f.Flags[flag.Name].StructField.Type
+			flagField := f.Flags[flag.Name]
+			flagType := flagField.StructField.Type
 			if flagType.Kind() == reflect.Pointer {
 				flagType = flagType.Elem()
 			}
 
 			var output strings.Builder
 			output.Write([]byte("\n\n"))
-			output.WriteByte('-')
-			output.WriteString(flag.Name)
+			output.WriteString((&ansi.ColoredText{Color: ansi.Green, Text: "-" + flag.Name}).String())
 
 			flagTypeString := flagType.String()
-			output.WriteByte(' ')
-			output.WriteByte('(')
-			output.WriteString(flagTypeString)
-			output.WriteByte(')')
+			output.WriteString(usageSeparator)
+			output.WriteString((&ansi.ColoredText{Color: ansi.Yellow, Text: flagTypeString}).String())
+
+			if slices.Contains(f.Required, flagField) {
+				output.WriteString(usageSeparator)
+				output.WriteString((&ansi.ColoredText{Color: ansi.Red, Text: "[REQUIRED]"}).String())
+			}
 
 			output.WriteByte('\n')
 			output.WriteString(indentAllLines(flag.Usage, usageIndent))
