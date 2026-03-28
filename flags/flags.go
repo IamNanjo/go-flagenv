@@ -96,7 +96,10 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 
 		defaultString := convert.AutoToString(Default)
 		if defaultString != "" && !slices.Contains(f.Required, field) {
-			description = append(description, "     DEFAULT: "+defaultString)
+			description = append(description, "     DEFAULT: "+(&ansi.ColoredText{
+				Color: ansi.Blue,
+				Text:  defaultString,
+			}).String())
 		}
 		finalDescription := strings.Join(description, "\n")
 
