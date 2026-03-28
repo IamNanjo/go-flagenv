@@ -45,7 +45,17 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		//  4. default value
 		description := make([]string, 0, 3)
 
-		envTag, hasEnv := field.StructField.Tag.Lookup("env")
+		var envTag string
+		var hasEnv bool
+
+		for envKey, envField := range f.Env {
+			if envField == field {
+				envTag = envKey
+				hasEnv = true
+				break
+			}
+		}
+
 		if hasEnv {
 			description = append(description, fmt.Sprintf("ENV VARIABLE: %s", envTag))
 		} else {
