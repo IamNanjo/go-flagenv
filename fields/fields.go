@@ -49,21 +49,23 @@ func parse[T any](f *Fields, c T, flagPrefix string, envPrefix string) (*Fields,
 		structField := configType.Field(i)
 		fieldValue := config.Field(i)
 
-		// Recursive parsing
+		// Recursive parsing for nested structs
 		if !structField.Type.Implements(convert.CustomParserType) {
 			if structField.Type.Kind() == reflect.Struct {
-				flagPrefix := structField.Tag.Get("flag")
-				envPrefix := structField.Tag.Get("env")
-				_, err := parse(f, fieldValue.Addr().Interface(), flagPrefix, envPrefix)
-				if err != nil {
+				fPrefix := flagPrefix + structField.Tag.Get("flag")
+				ePrefix := envPrefix + structField.Tag.Get("env")
+				fVal := fieldValue.Addr().Interface()
+				if _, err := parse(f, fVal, fPrefix, ePrefix); err != nil {
 					return f, format.Err("Nested field parsing failed %w", err)
 				}
 				continue
 			}
 
 			if structField.Type.Kind() == reflect.Pointer && structField.Type.Elem().Kind() == reflect.Struct {
-				_, err := parse(f, fieldValue.Interface(), structField.Tag.Get("flag"), structField.Tag.Get("env"))
-				if err != nil {
+				fPrefix := flagPrefix + structField.Tag.Get("flag")
+				ePrefix := envPrefix + structField.Tag.Get("env")
+				fVal := fieldValue.Interface()
+				if _, err := parse(f, fVal, fPrefix, ePrefix); err != nil {
 					return f, format.Err("Nested field parsing failed %w", err)
 				}
 				continue
