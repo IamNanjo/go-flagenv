@@ -163,11 +163,11 @@ Usage of flagenv:
              DEFAULT: 100, 101
 
     -nestedInt (int)
-        ENV VARIABLE: INT
+        ENV VARIABLE: NESTED_INT
              DEFAULT: 0
 
     -nestedString (string)
-        ENV VARIABLE: STRING
+        ENV VARIABLE: NESTED_STRING
              DEFAULT:
 
     -string (string)
