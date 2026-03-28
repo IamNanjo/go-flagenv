@@ -16,7 +16,6 @@ import (
 )
 
 const usageIndent = 4
-const usageSeparator = " · "
 
 type helpError struct {
 	Message strings.Builder
@@ -48,13 +47,13 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 
 		envTag, hasEnv := field.StructField.Tag.Lookup("env")
 		if hasEnv {
-			description = append(description, fmt.Sprintf("%sENV: %s", usageSeparator, envTag))
+			description = append(description, fmt.Sprintf("ENV VARIABLE: %s", envTag))
 		} else {
 			description = append(description, "")
 		}
 
 		if field.Description != nil && *field.Description != "" {
-			description = append(description, fmt.Sprintf("DESCRIPTION: %s", *field.Description))
+			description = append(description, fmt.Sprintf(" DESCRIPTION: %s", *field.Description))
 		}
 
 		// If pointer, get type that is pointed to
@@ -81,9 +80,9 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 
 		var defaultString strings.Builder
 		if reflect.TypeOf(Default).Implements(convert.CustomParserType) {
-			description = append(description, "    DEFAULT: "+defaultString.String())
+			description = append(description, "     DEFAULT: "+defaultString.String())
 
-			finalDescription := strings.Join(description, "\n  ")
+			finalDescription := strings.Join(description, "\n")
 
 			flagValue = flagSet.String(flagName, "", finalDescription)
 			postProcess[flagName] = func() error {
@@ -101,9 +100,9 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 
 		defaultString.WriteString(convert.AutoToString(Default))
 
-		description = append(description, "    DEFAULT: "+defaultString.String())
+		description = append(description, "     DEFAULT: "+defaultString.String())
 
-		finalDescription := strings.Join(description, "\n  ")
+		finalDescription := strings.Join(description, "\n")
 
 		switch actualType {
 		case reflect.TypeFor[bool]():
@@ -142,20 +141,28 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		writer := flagSet.Output()
 
 		fmt.Fprintf(writer, "Usage of %s:", flagSet.Name())
+
 		flagSet.VisitAll(func(flag *flag.Flag) {
 			flagType := f.Flags[flag.Name].StructField.Type
 			if flagType.Kind() == reflect.Pointer {
 				flagType = flagType.Elem()
 			}
 
-			fmt.Fprintf(
-				writer,
-				"\n\n  -%s%s%s%s",
-				flag.Name,
-				usageSeparator,
-				flagType,
-				indentAllLines(flag.Usage, usageIndent)[usageIndent:],
-			)
+			var output strings.Builder
+			output.Write([]byte("\n\n"))
+			output.WriteByte('-')
+			output.WriteString(flag.Name)
+
+			flagTypeString := flagType.String()
+			output.WriteByte(' ')
+			output.WriteByte('(')
+			output.WriteString(flagTypeString)
+			output.WriteByte(')')
+
+			output.WriteByte('\n')
+			output.WriteString(indentAllLines(flag.Usage, usageIndent))
+
+			fmt.Fprint(writer, output.String())
 		})
 		fmt.Fprintln(writer)
 	}
