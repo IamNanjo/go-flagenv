@@ -25,4 +25,10 @@ type AllTypes struct {
 	IntPtrSlicePtr  *[]*int       `flag:"intPtrSlicePtr"  env:"INT_PTR_SLICE_PTR" default:"100,101"   desc:"Pointer to slice of int pointers"`
 	Duration        time.Duration `flag:"duration"        env:"DURATION"          default:"1h1m1s"    desc:"Time duration"`
 	CustomStructPtr *CustomStruct `flag:"customStructPtr" env:"CUSTOM_STRUCT_PTR" required:"true"     desc:"Custom struct pointer"`
+	NestedContent   NestedContent `flag:"nested"          env:"NESTED_"`
+}
+
+type NestedContent struct {
+	Int    int    `flag:"Int" env:"INT"`
+	String string `flag:"String" env:"STRING"`
 }

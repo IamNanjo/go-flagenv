@@ -23,6 +23,8 @@ func TestEnv(t *testing.T) {
 	t.Setenv("INT_SLICE_PTR", "-3, -2, -1, 0, 1, 2, 3")
 	t.Setenv("INT_PTR_SLICE_PTR", "-3, -2, -1, 0, 1, 2, 3")
 	t.Setenv("CUSTOM_STRUCT_PTR", "true")
+	t.Setenv("NESTED_INT", "-10")
+	t.Setenv("NESTED_STRING", "string")
 
 	config := new(testdata.AllTypes)
 	fields, err := fields.Parse(config)

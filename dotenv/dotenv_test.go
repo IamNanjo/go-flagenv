@@ -27,6 +27,8 @@ INT_SLICE=-3, -2, -1, 0, 1, 2, 3
 INT_SLICE_PTR=-3, -2, -1, 0, 1, 2, 3
 INT_PTR_SLICE_PTR=-3, -2, -1, 0, 1, 2, 3
 CUSTOM_STRUCT_PTR=true
+NESTED_INT=-10
+NESTED_STRING=string
 `)
 
 func TestDotEnv(t *testing.T) {

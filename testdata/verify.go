@@ -64,8 +64,11 @@ func VerifyAllTypes(t *testing.T, config *AllTypes) {
 	} else if v := config.CustomStructPtr.Bool; !v {
 		t.Errorf(`Expected CustomStructPtr.Bool to be true. Got %v`, v)
 	}
-}
 
-func VerifyDefaults(t *testing.T, config *AllTypes) {
-
+	if v, cv := config.NestedContent.Int, -10; v != cv {
+		t.Errorf("Expected Int to be %v. Got %v", cv, v)
+	}
+	if v, cv := config.NestedContent.String, "string"; v != cv {
+		t.Errorf("Expected String to be %v. Got %v", cv, v)
+	}
 }

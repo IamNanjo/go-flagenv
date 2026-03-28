@@ -31,6 +31,8 @@ var args = []string{
 	"-intSlicePtr", "-3, -2, -1, 0, 1, 2, 3",
 	"-intPtrSlicePtr", "-3, -2, -1, 0, 1, 2, 3",
 	"-customStructPtr", "true",
+	"-nestedInt", "-10",
+	"-nestedString", "string",
 }
 
 func TestFlags(t *testing.T) {

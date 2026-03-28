@@ -19,7 +19,7 @@ type Fields struct {
 type Field struct {
 	StructField reflect.StructField // Field type
 	Value       reflect.Value       // Value
-	Default     any                 // Default value correct type for the field
+	Default     any                 // Default value (correct type for the field)
 	Description *string             // Description
 }
 
@@ -31,7 +31,14 @@ func Parse[T any](c *T) (*Fields, error) {
 		Defaults: []*Field{},
 	}
 
-	config := reflect.ValueOf(c).Elem()
+	return parse(f, c, "", "")
+}
+
+func parse[T any](f *Fields, c T, flagPrefix string, envPrefix string) (*Fields, error) {
+	config := reflect.ValueOf(c)
+	if config.Kind() == reflect.Pointer {
+		config = config.Elem()
+	}
 	configType := config.Type()
 
 	if configKind := config.Kind(); configKind != reflect.Struct {
@@ -41,6 +48,27 @@ func Parse[T any](c *T) (*Fields, error) {
 	for i := range configType.NumField() {
 		structField := configType.Field(i)
 		fieldValue := config.Field(i)
+
+		// Recursive parsing
+		if !structField.Type.Implements(convert.CustomParserType) {
+			if structField.Type.Kind() == reflect.Struct {
+				flagPrefix := structField.Tag.Get("flag")
+				envPrefix := structField.Tag.Get("env")
+				_, err := parse(f, fieldValue.Addr().Interface(), flagPrefix, envPrefix)
+				if err != nil {
+					return f, format.Err("Nested field parsing failed %w", err)
+				}
+				continue
+			}
+
+			if structField.Type.Kind() == reflect.Pointer && structField.Type.Elem().Kind() == reflect.Struct {
+				_, err := parse(f, fieldValue.Interface(), structField.Tag.Get("flag"), structField.Tag.Get("env"))
+				if err != nil {
+					return f, format.Err("Nested field parsing failed %w", err)
+				}
+				continue
+			}
+		}
 
 		if !fieldValue.CanSet() {
 			logging.Debug("Skipping non-settable field %q\n", structField.Name)
@@ -56,15 +84,18 @@ func Parse[T any](c *T) (*Fields, error) {
 
 		flagName, flagTagSet := structField.Tag.Lookup("flag")
 		if flagTagSet {
+			flagName = flagPrefix + flagName
 			f.Flags[flagName] = field
 		}
 
 		envTag, envTagSet := structField.Tag.Lookup("env")
 		if envTagSet {
+			envTag = envPrefix + envTag
 			f.Env[envTag] = field
 		}
 
 		if !flagTagSet && !envTagSet {
+			logging.Debug("Skipping field with no flag or env tag: %q\n", structField.Name)
 			continue
 		}
 
