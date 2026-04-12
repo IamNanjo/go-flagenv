@@ -1,16 +1,38 @@
 package convert
 
 import (
+	"bytes"
 	"reflect"
 	"strconv"
-	"strings"
 	"time"
+
+	"github.com/IamNanjo/go-logging/pkg/format"
 )
 
 // Map of supported type to FromString function
 var FromString = map[reflect.Type]func(input []byte) (any, error){
 	reflect.TypeFor[bool](): func(input []byte) (any, error) {
-		return strings.ToLower(string(input)) == "true", nil
+		if len(input) == 1 {
+			switch input[0] {
+			case '1', 't', 'T', 'y', 'Y':
+				return true, nil
+			case '0', 'f', 'F', 'n', 'N':
+				return false, nil
+			}
+		} else {
+			switch {
+			case bytes.EqualFold(input, []byte("true")),
+				bytes.EqualFold(input, []byte("yes")),
+				bytes.EqualFold(input, []byte("on")):
+				return true, nil
+			case bytes.EqualFold(input, []byte("false")),
+				bytes.EqualFold(input, []byte("no")),
+				bytes.EqualFold(input, []byte("off")):
+				return false, nil
+			}
+		}
+
+		return false, format.Err("Value is not a valid boolean: %v", input)
 	},
 	reflect.TypeFor[int](): func(input []byte) (any, error) {
 		parsed, err := strconv.ParseInt(string(input), 0, 0)
