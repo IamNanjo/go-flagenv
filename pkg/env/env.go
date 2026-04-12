@@ -4,8 +4,8 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/IamNanjo/go-flagenv/fields"
-	"github.com/IamNanjo/go-flagenv/internal/convert"
+	"github.com/IamNanjo/go-flagenv/pkg/convert"
+	"github.com/IamNanjo/go-flagenv/pkg/fields"
 
 	"github.com/IamNanjo/go-logging/pkg/format"
 )

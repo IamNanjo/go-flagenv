@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/IamNanjo/go-flagenv"
-	"github.com/IamNanjo/go-flagenv/fields"
-	"github.com/IamNanjo/go-flagenv/flags"
+	"github.com/IamNanjo/go-flagenv/pkg/fields"
+	"github.com/IamNanjo/go-flagenv/pkg/flags"
 	"github.com/IamNanjo/go-flagenv/testdata"
 )
 

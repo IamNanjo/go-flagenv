@@ -1,3 +1,7 @@
+// This package allows parsing CLI flags and environment variables.
+// It also automatically loads and parses .env file if it exists.
+// Parse function is better for most situation as it uses sensible defaults and handles -help menu automatically.
+// ParseCustom can be used when more control is desired.
 package flagenv
 
 import (
@@ -6,12 +10,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/IamNanjo/go-flagenv/defaults"
-	"github.com/IamNanjo/go-flagenv/dotenv"
-	"github.com/IamNanjo/go-flagenv/env"
-	"github.com/IamNanjo/go-flagenv/fields"
-	"github.com/IamNanjo/go-flagenv/flags"
-	"github.com/IamNanjo/go-flagenv/required"
+	"github.com/IamNanjo/go-flagenv/pkg/defaults"
+	"github.com/IamNanjo/go-flagenv/pkg/dotenv"
+	"github.com/IamNanjo/go-flagenv/pkg/env"
+	"github.com/IamNanjo/go-flagenv/pkg/fields"
+	"github.com/IamNanjo/go-flagenv/pkg/flags"
+	"github.com/IamNanjo/go-flagenv/pkg/required"
 
 	"github.com/IamNanjo/go-logging"
 	"github.com/IamNanjo/go-logging/pkg/format"
@@ -40,7 +44,7 @@ import (
 //	string
 //	[]byte
 //	time.Duration
-//	*convert.CustomParser (pointer to any other type that implements convert.CustomParser interface)
+//	*pkg/convert.CustomParser (pointer to any other type that implements pkg/convert.CustomParser interface)
 func Parse[T any](config *T) error {
 	err := ParseCustom(config, os.Args[1:], ".env")
 	if errors.Is(err, flag.ErrHelp) {

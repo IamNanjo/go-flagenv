@@ -3,15 +3,13 @@ package convert
 import (
 	"reflect"
 	"strings"
-
-	"github.com/IamNanjo/go-flagenv/convert"
 )
 
 // Automatically convert to supported type
 func AutoToString(input any) string {
 	v := reflect.ValueOf(input)
 	if parser := CustomParserFromType(v.Type()); parser != nil {
-		return input.(convert.CustomParser).String()
+		return input.(CustomParser).String()
 	}
 
 	isPointer := v.Kind() == reflect.Pointer

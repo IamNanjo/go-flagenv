@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/IamNanjo/go-flagenv/defaults"
-	"github.com/IamNanjo/go-flagenv/fields"
+	"github.com/IamNanjo/go-flagenv/pkg/defaults"
+	"github.com/IamNanjo/go-flagenv/pkg/fields"
 	"github.com/IamNanjo/go-flagenv/testdata"
 )
 

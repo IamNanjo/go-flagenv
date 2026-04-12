@@ -3,8 +3,8 @@ package required_test
 import (
 	"testing"
 
-	"github.com/IamNanjo/go-flagenv/fields"
-	"github.com/IamNanjo/go-flagenv/required"
+	"github.com/IamNanjo/go-flagenv/pkg/fields"
+	"github.com/IamNanjo/go-flagenv/pkg/required"
 	"github.com/IamNanjo/go-flagenv/testdata"
 )
 

@@ -12,7 +12,7 @@ func AutoFromBytes(t reflect.Type, input []byte) (any, error) {
 	if parser := CustomParserFromType(t); parser != nil {
 		err := parser.UnmarshalText(input)
 		if err != nil {
-			return nil, format.Err("CustomParser.FromString failed %w", err)
+			return nil, format.Err("CustomParser.UnmarshalText failed %w", err)
 		}
 		return parser, nil
 	}
@@ -45,7 +45,7 @@ func AutoFromBytes(t reflect.Type, input []byte) (any, error) {
 		}
 	}
 
-	c, compatible := FromString[actualType]
+	c, compatible := FromBytes[actualType]
 	if !compatible {
 		return nil, format.Err("Unsupported type %q", t)
 	}

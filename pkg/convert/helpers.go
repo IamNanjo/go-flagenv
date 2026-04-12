@@ -3,12 +3,10 @@ package convert
 import (
 	"reflect"
 
-	"github.com/IamNanjo/go-flagenv/convert"
-
 	"github.com/IamNanjo/go-logging/pkg/format"
 )
 
-var CustomParserType = reflect.TypeFor[convert.CustomParser]()
+var CustomParserType = reflect.TypeFor[CustomParser]()
 
 // Returns error if unsupported
 func FieldIsSupported(t reflect.Type) error {
@@ -34,7 +32,7 @@ func FieldIsSupported(t reflect.Type) error {
 		}
 	}
 
-	for st := range FromString {
+	for st := range FromBytes {
 		if st == actualType {
 			return nil
 		}
@@ -50,9 +48,9 @@ func IsNormalPointer(t reflect.Type) bool {
 }
 
 // Make a new CustomParser of type t.
-func CustomParserFromType(t reflect.Type) convert.CustomParser {
+func CustomParserFromType(t reflect.Type) CustomParser {
 	if t.Implements(CustomParserType) {
-		parser, ok := reflect.New(t.Elem()).Interface().(convert.CustomParser)
+		parser, ok := reflect.New(t.Elem()).Interface().(CustomParser)
 		if !ok {
 			return nil
 		}

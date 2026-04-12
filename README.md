@@ -10,7 +10,7 @@ optional defaults and support for required variables that will cause the parser 
 
 ```go
 // Example struct with all supported types (all of the native types can be pointers or slices).
-// CustomStruct implements convert.CustomParser which allows using any type as long as it's a pointer.
+// CustomStruct implements pkg/convert.CustomParser which allows using any type as long as it's a pointer.
 type AllTypes struct {
 	Bool            bool          `flag:"bool"            env:"BOOL"              default:"true"      desc:"Boolean"`
 	Int             int           `flag:"int"             env:"INT"               default:"1000"      desc:"Int"`
@@ -72,8 +72,8 @@ func main() {
 ```go
 type CustomStruct struct{ Bool bool }
 
-func (cs *CustomStruct) FromString(input string) error {
-	cs.Bool = strings.ToLower(input) == "true"
+func (cs *CustomStruct) UnmarshalText(input []byte) error {
+	cs.Bool = strings.ToLower(string(input)) == "true"
 	return nil
 }
 
@@ -92,115 +92,110 @@ func (cs *CustomStruct) String() string {
 ```plaintext
 Usage of flagenv:
 
-    -bool (bool)
+    -bool · bool
         ENV VARIABLE: BOOL
          DESCRIPTION: Boolean
              DEFAULT: true
 
-    -byteSlice ([]uint8)
+    -byteSlice · []uint8 · [REQUIRED]
         ENV VARIABLE: BYTE_SLICE
          DESCRIPTION: Byte slice
-             DEFAULT:
 
-    -customStructPtr (testdata.CustomStruct)
+    -customStructPtr · testdata.CustomStruct · [REQUIRED]
         ENV VARIABLE: CUSTOM_STRUCT_PTR
          DESCRIPTION: Custom struct pointer
-             DEFAULT:
 
-    -duration (time.Duration)
+    -duration · time.Duration
         ENV VARIABLE: DURATION
          DESCRIPTION: Time duration
              DEFAULT: 1h1m1s
 
-    -float64 (float64)
+    -float64 · float64
         ENV VARIABLE: FLOAT64
          DESCRIPTION: 64-bit float
-             DEFAULT: 1e+03
+             DEFAULT: 1000.00
 
-    -int (int)
+    -int · int
         ENV VARIABLE: INT
          DESCRIPTION: Int
              DEFAULT: 1000
 
-    -int16 (int16)
+    -int16 · int16
         ENV VARIABLE: INT16
          DESCRIPTION: 16-bit int
              DEFAULT: 128
 
-    -int32 (int32)
+    -int32 · int32
         ENV VARIABLE: INT32
          DESCRIPTION: 32-bit int
              DEFAULT: 256
 
-    -int64 (int64)
+    -int64 · int64
         ENV VARIABLE: INT64
          DESCRIPTION: 64-bit int
              DEFAULT: 512
 
-    -int8 (int8)
+    -int8 · int8
         ENV VARIABLE: INT8
          DESCRIPTION: 8-bit int
              DEFAULT: 64
 
-    -intPtr (int)
+    -intPtr · int · [REQUIRED]
         ENV VARIABLE: INT_PTR
          DESCRIPTION: Int pointer
-             DEFAULT: 0
 
-    -intPtrSlicePtr ([]*int)
+    -intPtrSlicePtr · []*int
         ENV VARIABLE: INT_PTR_SLICE_PTR
          DESCRIPTION: Pointer to slice of int pointers
              DEFAULT: 100, 101
 
-    -intSlice ([]int)
+    -intSlice · []int
         ENV VARIABLE: INT_SLICE
          DESCRIPTION: Int slice
              DEFAULT: 100, 101
 
-    -intSlicePtr ([]int)
+    -intSlicePtr · []int
         ENV VARIABLE: INT_SLICE_PTR
          DESCRIPTION: Int slice pointer
              DEFAULT: 100, 101
 
-    -nestedInt (int)
+    -nestedInt · int
         ENV VARIABLE: NESTED_INT
              DEFAULT: 0
 
-    -nestedString (string)
+    -nestedString · string
         ENV VARIABLE: NESTED_STRING
-             DEFAULT:
 
-    -string (string)
+    -string · string · [REQUIRED]
         ENV VARIABLE: STRING
          DESCRIPTION: String
-             DEFAULT:
 
-    -stringSlice ([]string)
+    -stringSlice · []string
         ENV VARIABLE: STRING_SLICE
          DESCRIPTION: String slice
              DEFAULT: val1, val2
 
-    -uint (uint)
+    -uint · uint
         ENV VARIABLE: UINT
          DESCRIPTION: Uint
              DEFAULT: 1000
 
-    -uint16 (uint16)
+    -uint16 · uint16
         ENV VARIABLE: UINT16
          DESCRIPTION: 16-bit uint
              DEFAULT: 128
 
-    -uint32 (uint32)
+    -uint32 · uint32
         ENV VARIABLE: UINT32
          DESCRIPTION: 32-bit uint
              DEFAULT: 256
 
-    -uint64 (uint64)
+    -uint64 · uint64
         ENV VARIABLE: UINT64
          DESCRIPTION: 64-bit uint
              DEFAULT: 512
 
-    -uint8 (uint8)
+    -uint8 · uint8
         ENV VARIABLE: UINT8
          DESCRIPTION: 8-bit uint
              DEFAULT: 64

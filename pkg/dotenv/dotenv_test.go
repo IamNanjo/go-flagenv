@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/IamNanjo/go-flagenv/dotenv"
-	"github.com/IamNanjo/go-flagenv/fields"
+	"github.com/IamNanjo/go-flagenv/pkg/dotenv"
+	"github.com/IamNanjo/go-flagenv/pkg/fields"
 	"github.com/IamNanjo/go-flagenv/testdata"
 )
 

@@ -3,7 +3,7 @@ package required
 import (
 	"fmt"
 
-	"github.com/IamNanjo/go-flagenv/fields"
+	"github.com/IamNanjo/go-flagenv/pkg/fields"
 
 	"github.com/IamNanjo/go-logging/pkg/format"
 )

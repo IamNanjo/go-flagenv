@@ -9,8 +9,8 @@ import (
 	"github.com/IamNanjo/go-logging/pkg/format"
 )
 
-// Map of supported type to FromString function
-var FromString = map[reflect.Type]func(input []byte) (any, error){
+// Map of supported type to FromBytes function
+var FromBytes = map[reflect.Type]func(input []byte) (any, error){
 	reflect.TypeFor[bool](): func(input []byte) (any, error) {
 		if len(input) == 1 {
 			switch input[0] {
