@@ -76,7 +76,7 @@ func ParseCustom[T any](config *T, args []string, envPath string) error {
 			return format.Err("Flag parsing failed %w", err)
 		}
 	} else {
-		logging.Debug("No CLI arguments provided. Skipping...\n")
+		logging.Default.Debug("No CLI arguments provided. Skipping...\n")
 	}
 
 	if envPath != "" {
@@ -84,7 +84,7 @@ func ParseCustom[T any](config *T, args []string, envPath string) error {
 			return format.Err(".env parsing failed %w", err)
 		}
 	} else {
-		logging.Debug("No .env path provided. Skipping...\n")
+		logging.Default.Debug("No .env path provided. Skipping...\n")
 	}
 
 	if err = env.Parse(config, f); err != nil {

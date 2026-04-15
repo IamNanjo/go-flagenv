@@ -73,12 +73,12 @@ func parse[T any](f *Fields, c T, flagPrefix string, envPrefix string) (*Fields,
 		}
 
 		if !fieldValue.CanSet() {
-			logging.Debug("Skipping non-settable field %q\n", structField.Name)
+			logging.Default.Debug("Skipping non-settable field %q\n", structField.Name)
 			continue
 		}
 
 		if err := convert.FieldIsSupported(structField.Type); err != nil {
-			logging.Debug("Skipping unsupported field %q\n", structField.Name)
+			logging.Default.Debug("Skipping unsupported field %q\n", structField.Name)
 			continue
 		}
 
@@ -97,7 +97,7 @@ func parse[T any](f *Fields, c T, flagPrefix string, envPrefix string) (*Fields,
 		}
 
 		if !flagTagSet && !envTagSet {
-			logging.Debug("Skipping field with no flag or env tag: %q\n", structField.Name)
+			logging.Default.Debug("Skipping field with no flag or env tag: %q\n", structField.Name)
 			continue
 		}
 

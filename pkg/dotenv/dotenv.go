@@ -18,7 +18,7 @@ var quoteRunes = []byte{'"', '\''}
 func Parse[T any](c *T, f *fields.Fields, path string) error {
 	file, err := os.Open(path)
 	if err != nil {
-		logging.Debug("No .env file, skipping...\n")
+		logging.Default.Debug("No .env file, skipping...\n")
 		return nil
 	}
 	defer file.Close()
