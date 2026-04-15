@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/IamNanjo/go-flagenv/pkg/dotenv"
+	"github.com/IamNanjo/go-flagenv/pkg/env"
 	"github.com/IamNanjo/go-flagenv/pkg/fields"
 	"github.com/IamNanjo/go-flagenv/testdata"
 )
@@ -36,21 +37,25 @@ func TestDotEnv(t *testing.T) {
 
 	envPath := filepath.Join(t.TempDir(), ".env")
 	if err := os.WriteFile(envPath, envContent, 0600); err != nil {
-		t.Fatalf("Failed to create file %q: %v", envPath, err)
+		t.Fatalf("Failed to create file %q %v", envPath, err)
 	}
 	if err := os.Chmod(envPath, 0400); err != nil {
-		t.Fatalf("Failed to chmod file %q: %v", envPath, err)
+		t.Fatalf("Failed to chmod file %q %v", envPath, err)
 	}
 
-	config := new(testdata.AllTypes)
-	fields, err := fields.Parse(config)
+	c := new(testdata.AllTypes)
+	f, err := fields.Parse(c)
 	if err != nil {
-		t.Fatalf("Field parsing failed: %v", err)
+		t.Fatalf("Field parsing failed %v", err)
 	}
 
-	if err = dotenv.Parse(config, fields, envPath); err != nil {
-		t.Fatalf("Parsing failed: %v", err)
+	if err = dotenv.Parse(c, f, envPath); err != nil {
+		t.Fatalf(".env parsing failed %v", err)
 	}
 
-	testdata.VerifyAllTypes(t, config)
+	if err = env.Parse(c, f); err != nil {
+		t.Fatalf("Failed to apply env variables %v", err)
+	}
+
+	testdata.VerifyAllTypes(t, c)
 }

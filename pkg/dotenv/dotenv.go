@@ -3,11 +3,9 @@ package dotenv
 import (
 	"bufio"
 	"os"
-	"reflect"
 	"slices"
 	"strings"
 
-	"github.com/IamNanjo/go-flagenv/pkg/convert"
 	"github.com/IamNanjo/go-flagenv/pkg/fields"
 
 	"github.com/IamNanjo/go-logging"
@@ -16,6 +14,7 @@ import (
 
 var quoteRunes = []byte{'"', '\''}
 
+// Parse .env file and set all
 func Parse[T any](c *T, f *fields.Fields, path string) error {
 	file, err := os.Open(path)
 	if err != nil {
@@ -27,13 +26,11 @@ func Parse[T any](c *T, f *fields.Fields, path string) error {
 	// Scan .env one line at a time (default split function)
 	scanner := bufio.NewScanner(file)
 
-	envVars := map[string]string{}
-
 	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
+		line := []rune(strings.TrimSpace(scanner.Text()))
 
 		// Ignore lines that are either empty, comments or have no =
-		if len(line) == 0 || line[0] == '#' || !strings.Contains(line, "=") {
+		if len(line) == 0 || line[0] == '#' || !slices.Contains(line, '=') {
 			continue
 		}
 
@@ -73,36 +70,7 @@ func Parse[T any](c *T, f *fields.Fields, path string) error {
 			v = v[1 : vLen-1]
 		}
 
-		envVars[k] = v
+		os.Setenv(k, v)
 	}
-
-	// Check if Config fields use any of the parsed variables
-	for key, field := range f.Env {
-		// Already set
-		if field.Value.IsValid() && !field.Value.IsZero() {
-			continue
-		}
-
-		val, exists := envVars[key]
-		if !exists {
-			continue
-		}
-
-		parsed, err := convert.AutoFromBytes(field.StructField.Type, []byte(val))
-		if err != nil {
-			return format.Err("Failed to parse field %q with value %q %w", field.StructField.Name, val, err)
-		}
-
-		if convert.IsNormalPointer(field.StructField.Type) && reflect.TypeOf(parsed).Kind() != reflect.Pointer {
-			if field.Value.IsNil() {
-				field.Value.Set(reflect.New(reflect.TypeOf(parsed)))
-			} else {
-				field.Value.Elem().Set(reflect.ValueOf(parsed))
-			}
-		} else {
-			field.Value.Set(reflect.ValueOf(parsed))
-		}
-	}
-
 	return nil
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/IamNanjo/go-flagenv/pkg/fields"
 
 	"github.com/IamNanjo/go-logging/pkg/format"
+	"github.com/IamNanjo/go-logging/pkg/loglevel"
 )
 
 func Parse[T any](c *T, f *fields.Fields) error {
@@ -29,6 +30,8 @@ func Parse[T any](c *T, f *fields.Fields) error {
 
 		field.Value.Set(reflect.ValueOf(parsed))
 	}
+
+	loglevel.Level = loglevel.FromString(os.Getenv("LOGLEVEL"))
 
 	return nil
 }
