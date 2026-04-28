@@ -3,6 +3,7 @@ package fields
 
 import (
 	"reflect"
+	"strings"
 
 	"github.com/IamNanjo/go-flagenv/pkg/convert"
 
@@ -11,10 +12,10 @@ import (
 )
 
 type Fields struct {
-	Flags    map[string]*Field // CLI flags
-	Env      map[string]*Field // Environment variables
-	Required []*Field          // Required fields
-	Defaults []*Field          // All fields with default values
+	Flags    map[string]*FieldWithAliases // CLI flags
+	Env      map[string]*Field            // Environment variables
+	Required []*Field                     // Required fields
+	Defaults []*Field                     // All fields with default values
 }
 type Field struct {
 	StructField reflect.StructField // Field type
@@ -22,10 +23,14 @@ type Field struct {
 	Default     any                 // Default value (correct type for the field)
 	Description *string             // Description
 }
+type FieldWithAliases struct {
+	*Field
+	Aliases []string
+}
 
 func Parse[T any](c *T) (*Fields, error) {
 	f := &Fields{
-		Flags:    map[string]*Field{},
+		Flags:    map[string]*FieldWithAliases{},
 		Env:      map[string]*Field{},
 		Required: []*Field{},
 		Defaults: []*Field{},
@@ -84,10 +89,26 @@ func parse[T any](f *Fields, c T, flagPrefix string, envPrefix string) (*Fields,
 
 		field := &Field{StructField: structField, Value: fieldValue}
 
-		flagName, flagTagSet := structField.Tag.Lookup("flag")
+		flag, flagTagSet := structField.Tag.Lookup("flag")
 		if flagTagSet {
-			flagName = flagPrefix + flagName
-			f.Flags[flagName] = field
+			splitFlag := strings.Split(flag, ",")
+
+			if len(splitFlag) == 0 {
+				logging.Default.Fatal("Invalid flag tag for field %q\n", structField.Name)
+			}
+
+			flagName := strings.TrimSpace(splitFlag[0])
+			aliases := make([]string, 0, len(splitFlag)-1)
+
+			for _, f := range splitFlag[1:] {
+				f = strings.TrimSpace(f)
+				if len(f) == 0 {
+					logging.Default.Fatal("Invalid flag alias %q for field %q\n", f, structField.Name)
+				}
+				aliases = append(aliases, f)
+			}
+			flag = flagPrefix + flagName
+			f.Flags[flag] = &FieldWithAliases{Field: field, Aliases: aliases}
 		}
 
 		envTag, envTagSet := structField.Tag.Lookup("env")

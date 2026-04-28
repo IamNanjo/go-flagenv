@@ -3,6 +3,7 @@ package flags_test
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"testing"
 
 	"github.com/IamNanjo/go-flagenv"
@@ -53,7 +54,7 @@ func TestFlags(t *testing.T) {
 
 func TestHelp(t *testing.T) {
 	err := flagenv.ParseCustom(new(testdata.AllTypes), []string{"-help"}, "")
-	t.Logf("%+v", err)
+	fmt.Printf("%v", err)
 
 	if !errors.Is(err, flag.ErrHelp) {
 		t.Fatalf("Flag parsing did not return HelpError")

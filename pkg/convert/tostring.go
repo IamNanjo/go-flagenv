@@ -1,6 +1,7 @@
 package convert
 
 import (
+	"net/url"
 	"reflect"
 	"strconv"
 	"time"
@@ -58,5 +59,9 @@ var ToString = map[reflect.Type]func(input any) string{
 	},
 	reflect.TypeFor[time.Duration](): func(input any) string {
 		return input.(time.Duration).String()
+	},
+	reflect.TypeFor[url.URL](): func(input any) string {
+		val, _ := input.(url.URL)
+		return val.String()
 	},
 }

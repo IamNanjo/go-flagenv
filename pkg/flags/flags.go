@@ -17,7 +17,7 @@ import (
 	"github.com/IamNanjo/go-logging/pkg/format"
 )
 
-const usageIndent = 4
+const usageIndent = "    "
 const usageSeparator = " · "
 
 type helpError struct {
@@ -52,7 +52,7 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		var hasEnv bool
 
 		for envKey, envField := range f.Env {
-			if envField == field {
+			if envField == field.Field {
 				envTag = envKey
 				hasEnv = true
 				break
@@ -61,7 +61,7 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 
 		if hasEnv {
 			description = append(description,
-				fmt.Sprintf("ENV VARIABLE: %s", (&ansi.ColoredText{
+				fmt.Sprintf("%sENV VARIABLE: %s", usageIndent, (&ansi.ColoredText{
 					Color: ansi.Green,
 					Text:  envTag,
 				}).String()),
@@ -69,7 +69,7 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		}
 
 		if field.Description != nil && *field.Description != "" {
-			description = append(description, fmt.Sprintf(" DESCRIPTION: %s", *field.Description))
+			description = append(description, fmt.Sprintf("%s DESCRIPTION: %s", usageIndent, *field.Description))
 		}
 
 		// If pointer, get type that is pointed to
@@ -91,22 +91,32 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 			}
 		}
 
-		// Pointer to value received from flag
-		var flagValue any = nil
-
 		defaultString := convert.AutoToString(Default)
-		if defaultString != "" && !slices.Contains(f.Required, field) {
-			description = append(description, "     DEFAULT: "+(&ansi.ColoredText{
-				Color: ansi.Blue,
-				Text:  defaultString,
-			}).String())
+		if defaultString != "" && !slices.Contains(f.Required, field.Field) {
+			description = append(description,
+				fmt.Sprintf(
+					"%s     DEFAULT: %s",
+					usageIndent,
+					(&ansi.ColoredText{
+						Color: ansi.Blue,
+						Text:  defaultString,
+					}).String(),
+				),
+			)
 		}
 		finalDescription := strings.Join(description, "\n")
 
 		if reflect.TypeOf(Default).Implements(convert.CustomParserType) {
-			flagValue = flagSet.String(flagName, "", finalDescription)
+			var flagValue string
+			for i := len(field.Aliases) - 1; i >= 0; i-- {
+				flagSet.StringVar(&flagValue, field.Aliases[i], "", "")
+			}
+			flagSet.StringVar(&flagValue, flagName, "", finalDescription)
 			postProcess[flagName] = func() error {
-				parsed, err := convert.AutoFromBytes(field.StructField.Type, []byte(*flagValue.(*string)))
+				if flagValue == "" {
+					return nil
+				}
+				parsed, err := convert.AutoFromBytes(field.StructField.Type, []byte(flagValue))
 				if err != nil {
 					return format.Err("CustomParser.UnmarshalText failed %w", err)
 				}
@@ -119,10 +129,13 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 
 		switch actualType {
 		case reflect.TypeFor[bool]():
-			flagValue = flagSet.Bool(flagName, false, finalDescription)
+			var flagValue bool
+			for _, a := range field.Aliases {
+				flagSet.BoolVar(&flagValue, a, false, "")
+			}
+			flagSet.BoolVar(&flagValue, flagName, false, finalDescription)
 			postProcess[flagName] = func() error {
-				val := (flagValue.(*bool))
-				newValue := reflect.ValueOf(val)
+				newValue := reflect.ValueOf(&flagValue)
 				if isPointer {
 					field.Value.Set(newValue)
 				} else {
@@ -131,13 +144,16 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 				return nil
 			}
 		default:
-			flagValue = flagSet.String(flagName, "", finalDescription)
+			var flagValue string
+			for _, a := range field.Aliases {
+				flagSet.StringVar(&flagValue, a, "", "")
+			}
+			flagSet.StringVar(&flagValue, flagName, "", finalDescription)
 			postProcess[flagName] = func() error {
-				val := *(flagValue.(*string))
-				if val == "" {
+				if flagValue == "" {
 					return nil
 				}
-				result, err := convert.AutoFromBytes(field.StructField.Type, []byte(val))
+				result, err := convert.AutoFromBytes(field.StructField.Type, []byte(flagValue))
 				if err != nil {
 					return format.Err("Failed to convert from bytes %w", err)
 				}
@@ -149,6 +165,7 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		}
 	}
 
+	HelpError.Message.Reset()
 	flagSet.SetOutput(&HelpError.Message)
 	flagSet.Usage = func() {
 		writer := flagSet.Output()
@@ -156,7 +173,10 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		fmt.Fprintf(writer, "Usage of %s:", flagSet.Name())
 
 		flagSet.VisitAll(func(flag *flag.Flag) {
-			flagField := f.Flags[flag.Name]
+			flagField, isFlag := f.Flags[flag.Name]
+			if !isFlag {
+				return
+			}
 			flagType := flagField.StructField.Type
 			if flagType.Kind() == reflect.Pointer {
 				flagType = flagType.Elem()
@@ -166,21 +186,25 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 			output.Write([]byte("\n\n"))
 			output.WriteString((&ansi.ColoredText{Color: ansi.Green, Text: "-" + flag.Name}).String())
 
+			for _, a := range flagField.Aliases {
+				output.WriteByte(' ')
+				output.WriteString((&ansi.ColoredText{Color: ansi.Green, Text: "-" + a}).String())
+			}
+
 			flagTypeString := flagType.String()
 			output.WriteString(usageSeparator)
 			output.WriteString((&ansi.ColoredText{Color: ansi.Yellow, Text: flagTypeString}).String())
 
-			if slices.Contains(f.Required, flagField) {
+			if slices.Contains(f.Required, flagField.Field) {
 				output.WriteString(usageSeparator)
 				output.WriteString((&ansi.ColoredText{Color: ansi.Red, Text: "[REQUIRED]"}).String())
 			}
 
 			output.WriteByte('\n')
-			output.WriteString(indentAllLines(flag.Usage, usageIndent))
+			output.WriteString(flag.Usage)
 
-			fmt.Fprint(writer, output.String())
+			fmt.Fprint(writer, indentAllLines(output.String()))
 		})
-		fmt.Fprintln(writer)
 	}
 
 	err := flagSet.Parse(args)
@@ -199,14 +223,11 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 	return nil
 }
 
-func indentAllLines(input string, indentWidth int) string {
-	indent := strings.Repeat(" ", indentWidth)
-
+func indentAllLines(input string) string {
 	var result strings.Builder
 	for l := range strings.Lines(input) {
-		result.WriteString(indent)
+		result.WriteString(usageIndent)
 		result.WriteString(l)
 	}
-
 	return result.String()
 }

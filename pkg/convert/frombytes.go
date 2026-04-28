@@ -2,6 +2,7 @@ package convert
 
 import (
 	"bytes"
+	"net/url"
 	"reflect"
 	"strconv"
 	"time"
@@ -86,5 +87,8 @@ var FromBytes = map[reflect.Type]func(input []byte) (any, error){
 	},
 	reflect.TypeFor[time.Duration](): func(input []byte) (any, error) {
 		return time.ParseDuration(string(input))
+	},
+	reflect.TypeFor[url.URL](): func(input []byte) (any, error) {
+		return url.Parse(string(input))
 	},
 }
