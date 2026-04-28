@@ -11,7 +11,7 @@ import (
 	"github.com/IamNanjo/go-logging/pkg/loglevel"
 )
 
-func Parse[T any](c *T, f *fields.Fields) error {
+func Parse(f *fields.Fields) error {
 	for key, field := range f.Env {
 		// Already set
 		if field.Value.IsValid() && !field.Value.IsZero() {
@@ -20,7 +20,15 @@ func Parse[T any](c *T, f *fields.Fields) error {
 
 		val, exists := os.LookupEnv(key)
 		if !exists {
-			continue
+			for i := len(field.Aliases) - 1; i >= 0; i-- {
+				val, exists = os.LookupEnv(field.Aliases[i])
+				if exists {
+					break
+				}
+			}
+			if !exists {
+				continue
+			}
 		}
 
 		parsed, err := convert.AutoFromBytes(field.StructField.Type, []byte(val))

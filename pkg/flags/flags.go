@@ -34,7 +34,7 @@ func (e helpError) Unwrap() error {
 
 var HelpError = helpError{Inner: flag.ErrHelp}
 
-func Parse[T any](c *T, f *fields.Fields, args []string) error {
+func Parse(f *fields.Fields, args []string) error {
 	// Functions to be called after flags are parsed (value has been set in the pointer)
 	var postProcess = make(map[string]func() error, 0)
 
@@ -49,27 +49,38 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		description := make([]string, 0, 3)
 
 		var envTag string
+		var envAliases []string
 		var hasEnv bool
 
 		for envKey, envField := range f.Env {
-			if envField == field.Field {
+			if envField.Field == field.Field {
 				envTag = envKey
+				envAliases = envField.Aliases
 				hasEnv = true
 				break
 			}
 		}
 
 		if hasEnv {
-			description = append(description,
-				fmt.Sprintf("%sENV VARIABLE: %s", usageIndent, (&ansi.ColoredText{
+			var envVars strings.Builder
+			envVars.WriteString(usageIndent)
+			envVars.WriteString("ENV VARIABLES: ")
+			envVars.WriteString((&ansi.ColoredText{
+				Color: ansi.Green,
+				Text:  envTag,
+			}).String())
+			for _, e := range envAliases {
+				envVars.WriteString(", ")
+				envVars.WriteString((&ansi.ColoredText{
 					Color: ansi.Green,
-					Text:  envTag,
-				}).String()),
-			)
+					Text:  e,
+				}).String())
+			}
+			description = append(description, envVars.String())
 		}
 
 		if field.Description != nil && *field.Description != "" {
-			description = append(description, fmt.Sprintf("%s DESCRIPTION: %s", usageIndent, *field.Description))
+			description = append(description, fmt.Sprintf("%s  DESCRIPTION: %s", usageIndent, *field.Description))
 		}
 
 		// If pointer, get type that is pointed to
@@ -95,7 +106,7 @@ func Parse[T any](c *T, f *fields.Fields, args []string) error {
 		if defaultString != "" && !slices.Contains(f.Required, field.Field) {
 			description = append(description,
 				fmt.Sprintf(
-					"%s     DEFAULT: %s",
+					"%s      DEFAULT: %s",
 					usageIndent,
 					(&ansi.ColoredText{
 						Color: ansi.Blue,

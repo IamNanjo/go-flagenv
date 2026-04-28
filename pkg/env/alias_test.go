@@ -1,29 +1,27 @@
-package flags_test
+package env_test
 
 import (
 	"testing"
 
+	"github.com/IamNanjo/go-flagenv/pkg/env"
 	"github.com/IamNanjo/go-flagenv/pkg/fields"
-	"github.com/IamNanjo/go-flagenv/pkg/flags"
 	"github.com/IamNanjo/go-flagenv/testdata"
 )
 
-var aliasArgs = []string{
-	"-i32", "-40",
-	"-i64", "-50",
-	"-u32", "60",
-	"-u64", "70",
-	"-f64", "80.90",
-}
+func TestEnvAliases(t *testing.T) {
+	t.Setenv("I32", "-40")
+	t.Setenv("I64", "-50")
+	t.Setenv("U32", "60")
+	t.Setenv("U64", "70")
+	t.Setenv("F64", "80.90")
 
-func TestFlagAliases(t *testing.T) {
 	config := new(testdata.AllTypes)
 	fields, err := fields.Parse(config)
 	if err != nil {
 		t.Fatalf("Field parsing failed: %v", err)
 	}
 
-	if err = flags.Parse(fields, aliasArgs); err != nil {
+	if err := env.Parse(fields); err != nil {
 		t.Fatalf("Parsing failed: %v", err)
 	}
 

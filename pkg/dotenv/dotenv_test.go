@@ -49,11 +49,11 @@ func TestDotEnv(t *testing.T) {
 		t.Fatalf("Field parsing failed %v", err)
 	}
 
-	if err = dotenv.Parse(c, f, envPath); err != nil {
+	if err = dotenv.Parse(f, envPath); err != nil {
 		t.Fatalf(".env parsing failed %v", err)
 	}
 
-	if err = env.Parse(c, f); err != nil {
+	if err = env.Parse(f); err != nil {
 		t.Fatalf("Failed to apply env variables %v", err)
 	}
 

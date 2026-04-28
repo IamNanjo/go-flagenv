@@ -32,7 +32,7 @@ func TestEnv(t *testing.T) {
 		t.Fatalf("Field parsing failed: %v", err)
 	}
 
-	if err := env.Parse(config, fields); err != nil {
+	if err := env.Parse(fields); err != nil {
 		t.Fatalf("Parsing failed: %v", err)
 	}
 

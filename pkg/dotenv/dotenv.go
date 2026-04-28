@@ -15,7 +15,7 @@ import (
 var quoteRunes = []byte{'"', '\''}
 
 // Parse .env file and set all
-func Parse[T any](c *T, f *fields.Fields, path string) error {
+func Parse(f *fields.Fields, path string) error {
 	file, err := os.Open(path)
 	if err != nil {
 		logging.Default.Debug("No .env file, skipping...\n")

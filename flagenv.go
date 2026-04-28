@@ -69,7 +69,7 @@ func ParseCustom[T any](config *T, args []string, envPath string) error {
 	}
 
 	if len(args) != 0 {
-		if err = flags.Parse(config, f, args); err != nil {
+		if err = flags.Parse(f, args); err != nil {
 			if errors.Is(err, flag.ErrHelp) {
 				return err
 			}
@@ -80,14 +80,14 @@ func ParseCustom[T any](config *T, args []string, envPath string) error {
 	}
 
 	if envPath != "" {
-		if err = dotenv.Parse(config, f, envPath); err != nil {
+		if err = dotenv.Parse(f, envPath); err != nil {
 			return format.Err(".env parsing failed %w", err)
 		}
 	} else {
 		logging.Default.Debug("No .env path provided. Skipping...\n")
 	}
 
-	if err = env.Parse(config, f); err != nil {
+	if err = env.Parse(f); err != nil {
 		return format.Err("Environment variable parsing failed %w", err)
 	}
 

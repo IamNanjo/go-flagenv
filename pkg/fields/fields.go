@@ -13,7 +13,7 @@ import (
 
 type Fields struct {
 	Flags    map[string]*FieldWithAliases // CLI flags
-	Env      map[string]*Field            // Environment variables
+	Env      map[string]*FieldWithAliases // Environment variables
 	Required []*Field                     // Required fields
 	Defaults []*Field                     // All fields with default values
 }
@@ -31,7 +31,7 @@ type FieldWithAliases struct {
 func Parse[T any](c *T) (*Fields, error) {
 	f := &Fields{
 		Flags:    map[string]*FieldWithAliases{},
-		Env:      map[string]*Field{},
+		Env:      map[string]*FieldWithAliases{},
 		Required: []*Field{},
 		Defaults: []*Field{},
 	}
@@ -89,9 +89,9 @@ func parse[T any](f *Fields, c T, flagPrefix string, envPrefix string) (*Fields,
 
 		field := &Field{StructField: structField, Value: fieldValue}
 
-		flag, flagTagSet := structField.Tag.Lookup("flag")
+		flagTag, flagTagSet := structField.Tag.Lookup("flag")
 		if flagTagSet {
-			splitFlag := strings.Split(flag, ",")
+			splitFlag := strings.Split(flagTag, ",")
 
 			if len(splitFlag) == 0 {
 				logging.Default.Fatal("Invalid flag tag for field %q\n", structField.Name)
@@ -107,14 +107,31 @@ func parse[T any](f *Fields, c T, flagPrefix string, envPrefix string) (*Fields,
 				}
 				aliases = append(aliases, f)
 			}
-			flag = flagPrefix + flagName
-			f.Flags[flag] = &FieldWithAliases{Field: field, Aliases: aliases}
+			flagTag = flagPrefix + flagName
+			f.Flags[flagTag] = &FieldWithAliases{Field: field, Aliases: aliases}
 		}
 
 		envTag, envTagSet := structField.Tag.Lookup("env")
 		if envTagSet {
-			envTag = envPrefix + envTag
-			f.Env[envTag] = field
+			splitEnv := strings.Split(envTag, ",")
+
+			if len(splitEnv) == 0 {
+				logging.Default.Fatal("Invalid env tag for field %q\n", structField.Name)
+			}
+
+			envName := strings.TrimSpace(splitEnv[0])
+			aliases := make([]string, 0, len(splitEnv)-1)
+
+			for _, e := range splitEnv[1:] {
+				e = strings.TrimSpace(e)
+				if len(e) == 0 {
+					logging.Default.Fatal("Invalid env alias %q for field %q\n", e, structField.Name)
+				}
+				aliases = append(aliases, e)
+			}
+
+			envTag = envPrefix + envName
+			f.Env[envTag] = &FieldWithAliases{Field: field, Aliases: aliases}
 		}
 
 		if !flagTagSet && !envTagSet {

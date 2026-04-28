@@ -45,7 +45,7 @@ func TestFlags(t *testing.T) {
 		t.Fatalf("Field parsing failed: %v", err)
 	}
 
-	if err = flags.Parse(config, fields, args); err != nil {
+	if err = flags.Parse(fields, args); err != nil {
 		t.Fatalf("Parsing failed: %v", err)
 	}
 
