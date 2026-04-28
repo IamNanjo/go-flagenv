@@ -16,6 +16,7 @@ type AllTypes struct {
 	Uint16          uint16        `flag:"uint16,u16"      env:"UINT16,U16"        default:"128"       desc:"16-bit uint"`
 	Uint32          uint32        `flag:"uint32,u32"      env:"UINT32,U32"        default:"256"       desc:"32-bit uint"`
 	Uint64          uint64        `flag:"uint64, u64"     env:"UINT64, U64"       default:"512"       desc:"64-bit uint"`
+	Float32         float32       `flag:"float32, f32"    env:"FLOAT32, F32"      default:"1000"      desc:"32-bit float"`
 	Float64         float64       `flag:"float64, f64"    env:"FLOAT64, F64"      default:"1000"      desc:"64-bit float"`
 	String          string        `flag:"string"          env:"STRING"            required:"true"     desc:"String"`
 	ByteSlice       []byte        `flag:"byteSlice"       env:"BYTE_SLICE"        required:"true"     desc:"Byte slice"`

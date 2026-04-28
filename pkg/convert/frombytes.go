@@ -74,7 +74,8 @@ var FromBytes = map[reflect.Type]func(input []byte) (any, error){
 		return strconv.ParseUint(string(input), 0, 64)
 	},
 	reflect.TypeFor[float32](): func(input []byte) (any, error) {
-		return strconv.ParseFloat(string(input), 32)
+		f64, err := strconv.ParseFloat(string(input), 32)
+		return float32(f64), err
 	},
 	reflect.TypeFor[float64](): func(input []byte) (any, error) {
 		return strconv.ParseFloat(string(input), 64)

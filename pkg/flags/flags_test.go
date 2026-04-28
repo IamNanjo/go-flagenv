@@ -25,6 +25,7 @@ var args = []string{
 	"-uint16", "50",
 	"-uint32", "60",
 	"-uint64", "70",
+	"-float32", "80.90",
 	"-float64", "80.90",
 	"-string", "string",
 	"-stringSlice", "value1,value2,value3",

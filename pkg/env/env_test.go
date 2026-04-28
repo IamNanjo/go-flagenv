@@ -16,6 +16,7 @@ func TestEnv(t *testing.T) {
 	t.Setenv("INT64", "-50")
 	t.Setenv("UINT", "30")
 	t.Setenv("UINT64", "70")
+	t.Setenv("FLOAT32", "80.90")
 	t.Setenv("FLOAT64", "80.90")
 	t.Setenv("STRING", "string")
 	t.Setenv("STRING_SLICE", "value1,value2,value3")

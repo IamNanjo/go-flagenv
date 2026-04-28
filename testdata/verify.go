@@ -20,6 +20,9 @@ func VerifyAllTypes(t *testing.T, config *AllTypes) {
 	if v, cv := config.Uint64, uint64(70); v != cv {
 		t.Errorf("Expected Uint64 to be %v. Got %v", cv, v)
 	}
+	if v, cv := config.Float32, float32(80.90); v != cv {
+		t.Errorf("Expected Float32 to be %v. Got %v", cv, v)
+	}
 	if v, cv := config.Float64, 80.90; v != cv {
 		t.Errorf("Expected Float64 to be %v. Got %v", cv, v)
 	}
